@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formulier invullen in 8 stappen – Ligo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blauw: #056181;
+    --turkoois: #09b9bb;
+    --ijsblauw: #e3f5f5;
+    --geel: #e9b950;
+    --geel-licht: #fbf3df;
+    --mint: #82ccb1;
+    --mint-licht: #eaf7f2;
+    --zalm: #f6d2c0;
+    --oranje: #e06025;
+    --rood: #c4321a;
+    --groen: #1f7a5a;
+    --grijs: #575656;
+    --ink: #1f2a30;
+    --paper: #ffffff;
+    --line: #c9e3e3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ijsblauw); color: var(--ink);
+    font-family: "Atkinson Hyperlegible", "Segoe UI", Arial, sans-serif;
+    font-size: 20px; line-height: 1.45;
+  }
+  header.kopbalk { background: var(--paper); border-bottom: 4px solid var(--turkoois); }
+  header.kopbalk .binnen { max-width: 760px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; gap: 14px; }
+  header.kopbalk img { height: 44px; width: auto; display: block; }
+  header.kopbalk span { color: var(--grijs); font-size: .95rem; border-left: 2px solid var(--line); padding-left: 14px; }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 2rem; line-height: 1.15; margin: 0 0 16px; color: var(--blauw); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  h2 { font-size: 1.3rem; margin: 0 0 12px; color: var(--blauw); }
+  a { color: var(--blauw); }
+  .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 24px; margin-bottom: 20px; }
+  .hidden { display: none !important; }
+
+  /* ---------- Startscherm: 8 tegels ---------- */
+  .tegels { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+  .tegel {
+    position: relative; aspect-ratio: 1 / 1; border: 3px solid var(--blauw); border-radius: 10px; background: var(--paper);
+    color: var(--blauw); font: inherit; font-size: 3.2rem; font-weight: 700; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px;
+  }
+  .tegel:hover { background: var(--ijsblauw); }
+  .tegel:focus-visible { outline: 4px solid var(--turkoois); outline-offset: 3px; }
+  .tegel .kenmerken { display: flex; gap: 4px; height: 26px; }
+  .tegel .kenmerken img { height: 26px; width: 26px; opacity: .85; }
+  .tegel .kenmerken .k { font-size: 1rem; line-height: 26px; color: var(--grijs); }
+  .tegel.klaar { background: var(--mint-licht); border-color: var(--groen); color: var(--groen); }
+  .tegel .badge {
+    position: absolute; top: -12px; right: -12px; width: 40px; height: 40px; border-radius: 50%;
+    background: var(--groen); color: #fff; display: none; align-items: center; justify-content: center; border: 3px solid #fff;
+  }
+  .tegel.klaar .badge { display: flex; }
+  details.lesgever { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 14px 18px; font-size: 1rem; }
+  details.lesgever summary { cursor: pointer; font-weight: 700; color: var(--blauw); }
+  details.lesgever ol { padding-left: 1.3em; margin: 12px 0; }
+  details.lesgever li { margin-bottom: 6px; }
+  details.lesgever p { margin: 8px 0; }
+
+  /* ---------- Bovenbalk in een oefening ---------- */
+  .oefbalk { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+  .oefnummer { font-size: 1.6rem; font-weight: 700; color: var(--blauw); display: flex; align-items: center; gap: 10px; }
+  .oefnummer .cijfer {
+    width: 52px; height: 52px; border-radius: 50%; background: var(--blauw); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 1.7rem;
+  }
+  .stippen { display: flex; gap: 6px; margin-left: auto; }
+  .stippen span { width: 14px; height: 14px; border-radius: 50%; background: var(--line); }
+  .stippen span.nu { background: var(--blauw); }
+  .stippen span.klaar { background: var(--mint); }
+
+  button { font: inherit; cursor: pointer; }
+  .knop {
+    font-weight: 700; padding: 12px 24px; border: 2px solid var(--blauw); border-radius: 6px;
+    background: var(--blauw); color: #fff; display: inline-flex; align-items: center; gap: 10px; min-height: 56px;
+  }
+  .knop:hover { background: #044e68; border-color: #044e68; }
+  .knop.wit { background: #fff; color: var(--blauw); }
+  .knop.wit:hover { background: var(--ijsblauw); }
+  .knop:focus-visible, .rond:focus-visible, .pijl:focus-visible { outline: 4px solid var(--turkoois); outline-offset: 2px; }
+  .knop svg { width: 26px; height: 26px; flex-shrink: 0; }
+  .rond {
+    width: 56px; height: 56px; border-radius: 50%; border: 2px solid var(--blauw); background: #fff; color: var(--blauw);
+    display: inline-flex; align-items: center; justify-content: center; padding: 0;
+  }
+  .rond:hover { background: var(--ijsblauw); }
+  .rond svg { width: 30px; height: 30px; }
+
+  /* ---------- Velden ---------- */
+  .uitleg-ster { display: flex; align-items: center; gap: 10px; margin: 0 0 18px; font-size: 1.05rem; }
+  .uitleg-ster .ster { font-size: 1.8rem; line-height: 1; }
+  .ster { color: var(--rood); font-weight: 700; margin-left: 3px; }
+  .veld { margin-top: 22px; }
+  .veld:first-child { margin-top: 0; }
+  .vraag { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+  .vraag label, .vraag .vraagtekst { font-weight: 700; font-size: 1.15rem; }
+  .picto { width: 64px; height: 64px; object-fit: contain; flex-shrink: 0; border-radius: 4px; background: #fff; }
+  input[type=text], select {
+    width: 100%; font: inherit; font-size: 1.2rem; padding: 12px 14px; border: 2px solid #8fbfc4;
+    border-radius: 6px; background: #fff; color: var(--ink); min-height: 56px;
+  }
+  select { cursor: pointer; }
+  input:focus, select:focus { outline: none; border-color: var(--blauw); box-shadow: 0 0 0 4px rgba(5,97,129,.2); }
+  input::placeholder { color: #8a9499; }
+  .kort input[type=text] { max-width: 180px; }
+
+  /* Oefening 1: invulveld naast de vraag (zoals de tabel op papier) */
+  .tabel { border: 2px solid var(--ink); border-radius: 4px; }
+  .veld.naast { display: grid; grid-template-columns: 260px 1fr; margin: 0; border-top: 2px solid var(--ink); }
+  .veld.naast:first-child { border-top: 0; }
+  .veld.naast .vraag { margin: 0; padding: 10px 12px; border-right: 2px solid var(--ink); flex-direction: column; align-items: flex-start; gap: 6px; }
+  .veld.naast .invul { padding: 10px 12px; display: flex; flex-direction: column; justify-content: center; }
+
+  /* Groep adres */
+  fieldset.groep { border: 2px solid var(--line); border-radius: 8px; margin: 22px 0 0; padding: 6px 16px 18px; }
+  fieldset.groep legend { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.2rem; color: var(--blauw); padding: 0 8px; }
+  .groepveld { display: grid; grid-template-columns: 3fr 1.3fr; gap: 0 16px; align-items: end; }
+  .groepveld.pc { grid-template-columns: 1.3fr 3fr; }
+  .groepveld.drie { grid-template-columns: 3fr 1.2fr 1fr; }
+  .groepveld .veld, fieldset.groep > .veld { margin-top: 18px; }
+
+  /* Samengestelde velden */
+  .datum3 { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+  .datum3 label { display: block; font-size: .9rem; color: var(--grijs); }
+  .datum3 input, .datum3 select { width: 110px; }
+  .datum3 .jaar input, .datum3 .jaar select { width: 140px; }
+  .telprefix { display: flex; align-items: stretch; }
+  .telprefix span { display: flex; align-items: center; padding: 0 14px; background: var(--ijsblauw); border: 2px solid #8fbfc4; border-right: 0; border-radius: 6px 0 0 6px; font-weight: 700; }
+  .telprefix input { border-radius: 0 6px 6px 0; }
+  .keuzes { display: flex; gap: 12px; flex-wrap: wrap; }
+  .keuzes label, .vink label {
+    display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border: 2px solid #8fbfc4; border-radius: 6px;
+    cursor: pointer; font-weight: 400; min-height: 56px; background: #fff;
+  }
+  .keuzes input, .vink input { width: 26px; height: 26px; margin: 0; accent-color: var(--blauw); cursor: pointer; }
+
+  /* Hulpknop (oefening 5 en 6) */
+  .hulp { position: relative; display: inline-flex; }
+  .hulpknop {
+    width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--blauw); background: var(--ijsblauw); color: var(--blauw);
+    font-weight: 700; font-size: 1.3rem; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .hulp .popup {
+    display: none; position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); z-index: 5;
+    background: #fff; border: 3px solid var(--blauw); border-radius: 10px; padding: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.18);
+  }
+  .hulp .popup img { width: 110px; height: 110px; display: block; object-fit: contain; }
+  .hulp:hover .popup, .hulp.toon .popup { display: block; }
+
+  /* Voorleesknop */
+  .spreek {
+    width: 40px; height: 40px; border-radius: 50%; border: 0; background: transparent; color: var(--blauw); padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .spreek:hover { background: var(--ijsblauw); }
+  .spreek svg { width: 26px; height: 26px; }
+
+  /* Foutmarkering bij verbeteren */
+  .veld.fout input[type=text], .veld.fout select, .veld.fout .keuzes label, .veld.fout .vink label { border-color: var(--rood); background: #fff8f5; }
+  .veld.fout .telprefix span { border-color: var(--rood); }
+  .veld.teveel input[type=text], .veld.teveel select { border-color: var(--geel); background: var(--geel-licht); }
+  .melding { display: none; align-items: center; gap: 8px; margin-top: 6px; font-weight: 700; color: var(--rood); }
+  .veld.teveel .melding { color: #8a5a00; }
+  .veld.fout .melding, .veld.teveel .melding { display: flex; }
+  .melding svg { width: 26px; height: 26px; flex-shrink: 0; }
+
+  .knoppen { display: flex; gap: 14px; margin-top: 28px; align-items: center; flex-wrap: wrap; }
+  .pijl {
+    width: 84px; height: 64px; border-radius: 10px; border: 2px solid var(--blauw); background: var(--blauw); color: #fff; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .pijl.terug { background: #fff; color: var(--blauw); }
+  .pijl svg { width: 40px; height: 40px; }
+  .pijl:hover { filter: brightness(.92); }
+  .stapteller { color: var(--grijs); font-size: 1rem; margin: 0 0 14px; }
+  .bladstippen { display: flex; gap: 10px; margin: 0 0 20px; }
+  .bladstippen span { width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--blauw); }
+  .bladstippen span.gedaan { background: var(--blauw); }
+  .bladstippen span.nu { background: var(--turkoois); border-color: var(--turkoois); }
+
+  /* ---------- Feedback ---------- */
+  .uitslag { text-align: center; padding: 8px 0 18px; }
+  .uitslag .groot { width: 120px; height: 120px; margin: 0 auto 10px; display: block; }
+  .uitslag h2 { font-size: 2rem; justify-content: center; display: flex; align-items: center; gap: 8px; margin: 0; }
+  .uitslag.goed h2 { color: var(--groen); }
+  .uitslag.niet h2 { color: var(--rood); }
+  ul.lijst { list-style: none; margin: 0; padding: 0; }
+  ul.lijst li { display: grid; grid-template-columns: 56px 1fr auto; align-items: center; gap: 12px; padding: 8px 4px; border-top: 1px solid var(--line); }
+  ul.lijst li img.picto, ul.lijst li .leegpicto { width: 52px; height: 52px; }
+  ul.lijst li .naam { font-weight: 700; }
+  ul.lijst li .uitleg { display: block; font-weight: 700; font-size: 1rem; }
+  ul.lijst li.ok .uitleg { color: var(--groen); font-weight: 400; }
+  ul.lijst li.fout .uitleg, ul.lijst li.leeg .uitleg { color: var(--rood); }
+  ul.lijst li.teveel .uitleg { color: #8a5a00; }
+  ul.lijst li svg.st { width: 40px; height: 40px; }
+  ul.lijst li.fout, ul.lijst li.leeg { background: #fff8f5; }
+  ul.lijst li.teveel { background: var(--geel-licht); }
+
+  @media (max-width: 640px) {
+    body { font-size: 18px; }
+    header.kopbalk .binnen > span { display: none; }
+    .tegels { grid-template-columns: repeat(2, 1fr); }
+    .veld.naast { grid-template-columns: 1fr; }
+    .veld.naast .vraag { border-right: 0; flex-direction: row; align-items: center; padding-bottom: 0; }
+    .groepveld, .groepveld.pc, .groepveld.drie { grid-template-columns: 1fr; }
+    .panel { padding: 18px 14px; }
+    .picto { width: 52px; height: 52px; }
+    .stippen { margin-left: 0; width: 100%; }
+  }
+  /* ---------- Klas (live volgen) ---------- */
+  .klasbalk { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin: -6px 0 14px; }
+  .klasbalk .knop svg, .klasicoon svg { width: 30px; height: 30px; }
+  .klasicoon { display: inline-flex; }
+  .klaschip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 30px; background: var(--paper); border: 2px solid var(--blauw); font-weight: 700; color: var(--blauw); }
+  .klaschip svg { width: 24px; height: 24px; }
+  .klaschip .dier { font-size: 1.8rem; line-height: 1; }
+  .rond.klein { width: 40px; height: 40px; font-size: 1.1rem; }
+  .coderij { display: flex; gap: 12px; align-items: stretch; }
+  input.code { max-width: 220px; font-size: 2rem !important; letter-spacing: .25em; text-transform: uppercase; text-align: center; font-weight: 700; }
+  .dieren { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .dierknop { font-size: 2.8rem; aspect-ratio: 1 / 1; border: 3px solid var(--line); border-radius: 12px; background: #fff; padding: 0; }
+  .dierknop:hover:not(:disabled) { border-color: var(--blauw); background: var(--ijsblauw); }
+  .dierknop:focus-visible { outline: 4px solid var(--turkoois); outline-offset: 2px; }
+  .dierknop:disabled { opacity: .18; cursor: not-allowed; }
+  .lesgeverpanel { font-size: 1rem; }
+  .lesgeverpanel .bestaande { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .lesgeverpanel .bestaande label { display: block; margin-bottom: 8px; }
+  .lesgeverpanel .melding { color: var(--rood); }
+  .klein { font-size: .9rem; color: var(--grijs); }
+  .grotecode { margin-left: auto; display: flex; align-items: baseline; gap: 12px; color: var(--blauw); }
+  .grotecode span { font-size: 1rem; color: var(--grijs); }
+  .grotecode strong { font-size: 2.6rem; letter-spacing: .15em; }
+  .tabelwrap { overflow-x: auto; }
+  table.klas { border-collapse: collapse; width: 100%; min-width: 520px; }
+  table.klas th, table.klas td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: center; }
+  table.klas thead th { color: var(--blauw); font-size: 1.1rem; }
+  table.klas tbody th { text-align: left; font-weight: 700; white-space: nowrap; }
+  table.klas .dier { font-size: 1.6rem; vertical-align: middle; }
+  table.klas td { font-size: 1.3rem; font-weight: 700; width: 9%; }
+  table.klas td small { display: block; font-size: .75rem; font-weight: 400; color: var(--grijs); }
+  table.klas td.actief { box-shadow: inset 0 0 0 3px var(--blauw); border-radius: 6px; }
+  table.klas tr.weg { opacity: .45; }
+  .c-klaar { color: var(--groen); } .c-fout { color: var(--rood); } .c-bezig { color: var(--turkoois); }
+  td.c-klaar { background: var(--mint-licht); } td.c-fout { background: #fff1ec; }
+  .legende { font-size: .9rem; color: var(--grijs); display: flex; gap: 6px 10px; flex-wrap: wrap; }
+  .leegklas { font-size: 1.1rem; }
+  .knop.gevaar { border-color: var(--rood); color: var(--rood); }
+  @media (max-width: 640px) { .dieren { grid-template-columns: repeat(4, 1fr); } .grotecode strong { font-size: 2rem; } }
+</style>
+</head>
+<body>
+<header class="kopbalk">
+  <div class="binnen">
+    <img src="data:image/png;base64,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" alt="Ligo">
+    <span>Oefensite: een formulier invullen</span>
+  </div>
+</header>
+<main id="main"></main>
+
+<script>
+/* Alles gebeurt in deze browser. Niets wordt verstuurd of bewaard.
+   Alleen welke oefeningen klaar zijn, staat even in sessionStorage (weg bij het sluiten van het tabblad). */
+
+// ---------- Pictogrammen ----------
+const P = {
+  persoon: 'data:image/png;base64,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',
+  huis: 'data:image/png;base64,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',
+  wereld: 'data:image/jpeg;base64,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',
+  taart: 'data:image/png;base64,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'
+};
+const lijn = s => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke="#111" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">' + s + '</svg>');
+Object.assign(P, {
+  familie: lijn('<circle cx="28" cy="24" r="10"/><path d="M12 88V56a16 16 0 0 1 32 0v32"/><circle cx="72" cy="24" r="10"/><path d="M56 88V56a16 16 0 0 1 32 0v32"/><circle cx="50" cy="56" r="8" fill="#fff"/><path d="M38 92V80a12 12 0 0 1 24 0v12" fill="#fff"/>'),
+  telefoon: lijn('<rect x="20" y="8" width="42" height="84" rx="8"/><path d="M34 18h14"/><circle cx="41" cy="80" r="4"/><path d="M72 36a14 14 0 0 1 0 22"/><path d="M80 28a26 26 0 0 1 0 38"/>'),
+  email: lijn('<rect x="6" y="22" width="80" height="56" rx="5"/><path d="M6 26l40 30 40-30"/><circle cx="78" cy="74" r="17" fill="#fff"/><text x="78" y="82" font-family="Arial,sans-serif" font-size="25" font-weight="700" text-anchor="middle" fill="#111" stroke="none">@</text>'),
+  straat: lijn('<path d="M36 8L12 94"/><path d="M64 8l24 86"/><path d="M50 14v10M50 36v14M50 62v18" stroke-width="6"/>'),
+  huisnr: lijn('<path d="M10 50L50 12l40 38"/><path d="M20 42v48h60V42"/><rect x="32" y="54" width="36" height="24" rx="3"/><text x="50" y="73" font-family="Arial,sans-serif" font-size="19" font-weight="700" text-anchor="middle" fill="#111" stroke="none">12</text>'),
+  postcode: lijn('<path d="M50 6c-11 0-19 8-19 18 0 13 19 28 19 28s19-15 19-28c0-10-8-18-19-18z"/><circle cx="50" cy="24" r="6"/><rect x="8" y="60" width="84" height="32" rx="5"/><text x="50" y="85" font-family="Arial,sans-serif" font-size="23" font-weight="700" text-anchor="middle" fill="#111" stroke="none" letter-spacing="2">1234</text>'),
+  stad: lijn('<path d="M6 92h88"/><rect x="10" y="48" width="22" height="44"/><path d="M38 92V34l11-14 11 14v58"/><path d="M49 8v12"/><rect x="66" y="40" width="24" height="52"/><path d="M16 58h10M16 70h10M72 52h12M72 64h12M72 76h12M45 46h8"/>'),
+});
+
+// ---------- Kleine iconen ----------
+const IC = {
+  spreek: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M16.5 12a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/><path d="M14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>',
+  huis: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>',
+  rechts: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 5l7 7-7 7"/></svg>',
+  links: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H5"/><path d="M11 5l-7 7 7 7"/></svg>',
+  verzend: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>',
+  opnieuw: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>',
+  potlood: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3l5 5L8 21H3v-5L16 3z"/></svg>',
+  vink: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  ok: '<svg class="st" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#1f7a5a"/><path d="M11 20.5l6 6L29 14" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  nok: '<svg class="st" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#c4321a"/><path d="M13 13l14 14M27 13L13 27" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>',
+  let: '<svg class="st" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#e9b950"/><path d="M20 10v13" stroke="#1f2a30" stroke-width="4.4" stroke-linecap="round"/><circle cx="20" cy="30" r="2.8" fill="#1f2a30"/></svg>',
+  grootGoed: '<svg class="groot" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#1f7a5a"/><path d="M33 62l18 18 37-40" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  grootNiet: '<svg class="groot" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="#e06025"/><path d="M60 28v40" stroke="#fff" stroke-width="12" stroke-linecap="round"/><circle cx="60" cy="88" r="7.5" fill="#fff"/></svg>',
+  duim: '<svg viewBox="0 0 48 48" width="56" height="56" aria-hidden="true"><path d="M14 22h-7v20h7z" fill="#82ccb1" stroke="#1f2a30" stroke-width="2.4" stroke-linejoin="round"/><path d="M14 22l8-14c3 0 5 2 4 6l-2 7h12c3 0 5 3 4 6l-3 11c-1 3-3 4-6 4H14z" fill="#e9b950" stroke="#1f2a30" stroke-width="2.4" stroke-linejoin="round"/></svg>',
+};
+
+// ---------- Velden ----------
+const F = {
+  voornaam:      { label: 'Voornaam', picto: 'persoon', check: 'naam' },
+  familienaam:   { label: 'Familienaam', picto: 'familie', check: 'naam' },
+  adres:         { label: 'Adres', picto: 'huis', check: 'adres' },
+  straat:        { label: 'Straat', picto: 'straat', check: 'straat' },
+  huisnummer:    { label: 'Huisnummer', picto: 'huisnr', check: 'huisnr', kort: true },
+  bus:           { label: 'Bus', check: 'vrij', kort: true },
+  straatnr:      { label: 'Straat en huisnummer', picto: 'huis', check: 'adres' },
+  postcode:      { label: 'Postcode', picto: 'postcode', check: 'postcode', kort: true, mode: 'numeric' },
+  stad:          { label: 'Stad', picto: 'stad', check: 'stad' },
+  telefoon:      { label: 'Telefoonnummer', picto: 'telefoon', check: 'tel', mode: 'tel' },
+  email:         { label: 'E-mailadres', picto: 'email', check: 'email', mode: 'email' },
+  nationaliteit: { label: 'Nationaliteit', picto: 'wereld', check: 'naam' },
+  geboortedatum: { label: 'Geboortedatum', picto: 'taart', check: 'datum', ph: 'dd/mm/jjjj' },
+  geslacht:      { label: 'Geslacht', soort: 'radio', opties: ['Man', 'Vrouw', 'X'] },
+  moedertaal:    { label: 'Moedertaal', check: 'naam' },
+  akkoord:       { label: 'Ik ga akkoord.', soort: 'vink' },
+};
+const veld = (key, extra) => Object.assign({ key }, F[key], extra || {});
+const groep = (velden, extra) => Object.assign({ groep: true, titel: 'Adres', picto: 'huis', velden }, extra || {});
+const adresGroep = () => groep([veld('straat'), veld('huisnummer'), veld('postcode'), veld('stad')]);
+
+const LANDEN = ['Afghanistan', 'Algerije', 'België', 'Congo', 'Eritrea', 'Ethiopië', 'Guinee', 'Irak', 'Iran', 'Marokko', 'Nederland',
+  'Oekraïne', 'Pakistan', 'Palestina', 'Roemenië', 'Rusland', 'Somalië', 'Syrië', 'Turkije', 'Andere'];
+
+// Varianten voor de verwoording (oefening 7 en 8)
+const V = {
+  voornaam: ['Voornaam', 'Voornaam', 'Voornamen'],
+  familienaam: ['Familienaam', 'Achternaam', 'Naam'],
+  adresTitel: ['Adres', 'Woonadres', 'Uw adres'],
+  straat: ['Straat', 'Straatnaam'],
+  huisnummer: ['Huisnummer', 'Nr.', 'Nummer'],
+  straatnr: ['Straat en huisnummer', 'Straat + nr.', 'Adres'],
+  stad: ['Stad', 'Gemeente', 'Woonplaats'],
+  telefoon: ['Telefoonnummer', 'Telefoon', 'Gsm', 'Gsm-nummer', 'Tel.'],
+  email: ['E-mailadres', 'E-mail', 'Mailadres'],
+  nationaliteit: ['Nationaliteit'],
+  geboortedatum: ['Geboortedatum', 'Datum van geboorte', 'Geboren op'],
+  geslacht: ['Geslacht'],
+  moedertaal: ['Moedertaal', 'Taal thuis'],
+  verzend: ['Verzenden', 'Versturen', 'Indienen', 'Bevestigen', 'Klaar', 'Opsturen'],
+  volgende: ['Volgende', 'Verder'],
+};
+const kies = a => a[Math.floor(Math.random() * a.length)];
+const schud = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const metLabel = (key, extra) => veld(key, Object.assign({ label: kies(V[key]) }, extra || {}));
+
+function variabelAdres(metBus) {
+  const t = { titel: kies(V.adresTitel) };
+  const r = Math.random();
+  if (metBus && r < 0.33) return groep([metLabel('straat'), metLabel('huisnummer'), veld('bus'), veld('postcode'), metLabel('stad')], Object.assign(t, { metBus: true }));
+  if (r < 0.66) return groep([metLabel('straatnr'), veld('postcode'), metLabel('stad')], Object.assign(t, { samen: true }));
+  return groep([metLabel('straat'), metLabel('huisnummer'), veld('postcode'), metLabel('stad')], t);
+}
+
+// Willekeurig verplicht maken: namen altijd, de rest willekeurig. Minstens 2 verplicht en 2 niet.
+function zetSterren(items) {
+  const vrij = items.filter(it => !['voornaam', 'familienaam', 'akkoord'].includes(it.key));
+  let k;
+  do { k = vrij.map(() => Math.random() < 0.5); } while (k.filter(Boolean).length < 2 || k.filter(x => !x).length < 2);
+  items.forEach(it => {
+    const req = vrij.includes(it) ? k[vrij.indexOf(it)] : true;
+    if (it.groep) it.velden.forEach(v => v.req = v.key === 'bus' ? false : req);
+    else it.req = req;
+  });
+}
+
+// ---------- De 8 oefeningen ----------
+const OEF = {
+  1: { titel: 'Naast de vraag', kenmerk: ['picto'] },
+  2: { titel: 'Onder de vraag', kenmerk: ['picto'] },
+  3: { titel: 'Adres in stukken', kenmerk: ['picto'] },
+  4: { titel: 'Met pijltjes', kenmerk: ['picto', 'pijl'] },
+  5: { titel: 'Hulpknop', kenmerk: ['hulp'] },
+  6: { titel: 'Sterretjes', kenmerk: ['hulp', 'ster'] },
+  7: { titel: 'Zonder pictogram', kenmerk: ['ster'] },
+  8: { titel: 'Alleen', kenmerk: ['ster', 'pijl'] },
+};
+
+function maakOefening(n) {
+  const basis = () => ['voornaam', 'familienaam', 'adres', 'telefoon', 'nationaliteit', 'geboortedatum', 'email'].map(k => veld(k));
+  const gesplitst = () => [veld('voornaam'), veld('familienaam'), adresGroep(), veld('telefoon'), veld('nationaliteit'), veld('geboortedatum'), veld('email')];
+  const c = { n, layout: 'onder', picto: 'zien', spreek: true, alles: true, knopIcoon: true, blad: 'een' };
+  switch (n) {
+    case 1: return Object.assign(c, { layout: 'naast', bladen: [basis()], knop: 'Verzenden' });
+    case 2: return Object.assign(c, { bladen: [basis()], knop: 'Versturen' });
+    case 3: return Object.assign(c, { bladen: [gesplitst()], knop: 'Indienen' });
+    case 4: return Object.assign(c, { blad: 'pijl', knop: 'Bevestigen', bladen: [
+      [veld('voornaam'), veld('familienaam')], [adresGroep()], [veld('telefoon'), veld('email')], [veld('nationaliteit'), veld('geboortedatum')]] });
+    case 5: return Object.assign(c, { picto: 'hulp', bladen: [gesplitst()], knop: 'Verzenden' });
+    case 6: {
+      const items = gesplitst();
+      const ster = { voornaam: 1, familienaam: 1, telefoon: 1, geboortedatum: 1 };
+      items.forEach(it => { if (it.groep) it.velden.forEach(v => v.req = true); else it.req = !!ster[it.key]; });
+      return Object.assign(c, { picto: 'hulp', alles: false, bladen: [items], knop: 'Indienen' });
+    }
+    case 7: {
+      const items = [metLabel('voornaam'), metLabel('familienaam'), metLabel('geslacht'), variabelAdres(false),
+        metLabel('telefoon'), metLabel('email'), metLabel('nationaliteit'), metLabel('geboortedatum'), metLabel('moedertaal')];
+      zetSterren(items);
+      return Object.assign(c, { picto: 'geen', spreek: false, alles: false, knopIcoon: false, bladen: [items], knop: kies(V.verzend) });
+    }
+    case 8: {
+      const namen = [metLabel('voornaam'), metLabel('familienaam')];
+      if (Math.random() < 0.6) namen.push(metLabel('geslacht'));
+      const datumSoort = kies(['tekst', 'datum3', 'datumKies']);
+      const datum = metLabel('geboortedatum', datumSoort === 'tekst' ? {} : { soort: datumSoort });
+      const tel = metLabel('telefoon', Math.random() < 0.5 ? { soort: 'telPrefix', check: 'telLokaal' } : {});
+      const nat = metLabel('nationaliteit', Math.random() < 0.5 ? { soort: 'kies', opties: LANDEN, check: 'vrij' } : {});
+      const eenheden = schud([[variabelAdres(true)], [tel, metLabel('email')], schud([nat, datum]), [metLabel('moedertaal')]]);
+      const alle = [namen, ...eenheden];
+      zetSterren(alle.flat());
+      // verdeel over 3 of 4 bladen
+      const aantal = Math.random() < 0.5 ? 3 : 4;
+      const bladen = Array.from({ length: aantal }, () => []);
+      bladen[0].push(...namen);
+      eenheden.forEach((e, i) => bladen[1 + Math.floor(i * (aantal - 1) / eenheden.length)].push(...e));
+      bladen[aantal - 1].push(veld('akkoord', { req: true }));
+      return Object.assign(c, { picto: 'geen', spreek: false, alles: false, knopIcoon: false, blad: 'knop',
+        volgende: kies(V.volgende), bladen, knop: kies(V.verzend) });
+    }
+  }
+}
+
+// ---------- Controle ----------
+const LETTERS = /^[\p{L}][\p{L}\p{M}\s'’.\-]*$/u;
+function controle(it, v) {
+  switch (it.check) {
+    case 'naam':
+      if (/\d/.test(v)) return 'Geen cijfers';
+      if (v.length < 2 || !LETTERS.test(v)) return 'Alleen letters';
+      return null;
+    case 'adres':
+      if (!/\p{L}{2,}/u.test(v)) return 'De straat ontbreekt';
+      if (!/\d/.test(v)) return 'Het nummer ontbreekt';
+      return null;
+    case 'straat':
+      if (/\d/.test(v)) return 'Het nummer niet hier';
+      if (!/\p{L}{2,}/u.test(v)) return 'De naam van de straat';
+      return null;
+    case 'huisnr':
+      if (!/^\d/.test(v)) return 'Begin met een cijfer';
+      if (!/^\d{1,4}\s*[a-z]?\s*((bus|b\.?|\/|-)?\s*[a-z0-9]{1,5})?$/i.test(v)) return 'Alleen het nummer';
+      return null;
+    case 'postcode':
+      return /^\d{4}$/.test(v) ? null : '4 cijfers. Zo: 8800';
+    case 'stad':
+      if (/\d/.test(v)) return 'Geen cijfers';
+      return LETTERS.test(v) && v.length > 1 ? null : 'Alleen letters';
+    case 'tel': {
+      const d = v.replace(/[\s.\/\-()]/g, '');
+      if (!/^\+?\d+$/.test(d)) return 'Alleen cijfers';
+      if (d[0] === '+') return d.length >= 11 && d.length <= 14 ? null : 'Kijk het nummer na';
+      if (d[0] !== '0') return 'Begin met 0';
+      if (d.length < 9) return 'Te kort';
+      if (d.length > 10) return 'Te lang';
+      return null;
+    }
+    case 'telLokaal': {
+      const d = v.replace(/[\s.\/\-()]/g, '');
+      if (!/^\d+$/.test(d)) return 'Alleen cijfers';
+      const min = d[0] === '0' ? 9 : 8, max = d[0] === '0' ? 10 : 9;
+      if (d.length < min) return 'Te kort';
+      if (d.length > max) return 'Te lang';
+      return null;
+    }
+    case 'email':
+      if (!v.includes('@')) return 'De @ ontbreekt';
+      if (/\s/.test(v)) return 'Geen spaties';
+      return /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v) ? null : 'Zo: naam@gmail.com';
+    case 'datum': {
+      const m = v.match(/^(\d{1,2})\s*[\/\-. ]\s*(\d{1,2})\s*[\/\-. ]\s*(\d{4})$/);
+      if (!m) return 'Zo: 31/01/1990';
+      const d = +m[1], mo = +m[2], j = +m[3], dt = new Date(j, mo - 1, d);
+      if (dt.getMonth() !== mo - 1 || dt.getDate() !== d) return 'Deze datum bestaat niet';
+      if (j < 1900 || j > new Date().getFullYear() - 5) return 'Kijk het jaar na';
+      return null;
+    }
+    default: return null;
+  }
+}
+
+// waarde lezen uit het geheugen (state.waarden), nooit bewaard
+function waardeVan(it) {
+  const W = state.waarden;
+  if (it.soort === 'datum3' || it.soort === 'datumKies') {
+    const d = (W[it.key + '_d'] || '').trim(), m = (W[it.key + '_m'] || '').trim(), j = (W[it.key + '_j'] || '').trim();
+    if (!d && !m && !j) return '';
+    if (!d || !m || !j) return { half: true };
+    return d + '/' + m + '/' + j;
+  }
+  if (it.soort === 'vink') return W[it.key] ? 'ja' : '';
+  return (W[it.key] || '').trim();
+}
+
+function beoordeel(it) {
+  const nodig = state.cfg.alles || it.req;
+  const v = waardeVan(it);
+  const ingevuld = v !== '';
+  if (nodig && !ingevuld) return { st: 'leeg', tekst: it.soort === 'vink' ? 'Aanvinken' : 'Vergeten' };
+  if (!nodig && ingevuld) return { st: 'teveel', tekst: 'Niet nodig: geen *' };
+  if (!nodig) return { st: 'ok', tekst: 'Goed: leeg gelaten' };
+  if (v.half) return { st: 'fout', tekst: 'Dag, maand en jaar' };
+  const f = controle(it, v);
+  return f ? { st: 'fout', tekst: f } : { st: 'ok', tekst: '' };
+}
+
+// ---------- Toestand ----------
+
+// ---------- Klas volgen (optioneel) ----------
+// Plak hier de web-app-URL van Code.gs (eindigt op /exec). Leeg laten = geen live volgen, dan verdwijnt de klasknop.
+const KLAS_URL = '';
+const DIER = { kat: '🐱', hond: '🐶', leeuw: '🦁', olifant: '🐘', kikker: '🐸', aap: '🐵', panda: '🐼', konijn: '🐰', vos: '🦊', tijger: '🐯',
+  koe: '🐮', varken: '🐷', kip: '🐔', schildpad: '🐢', vis: '🐟', vlinder: '🦋', uil: '🦉', beer: '🐻', paard: '🐴', muis: '🐭' };
+const KK = 'ligo-formulier-bt2-klas', LK = 'ligo-formulier-bt2-lesgever';
+function leesSS(k) { try { return JSON.parse(sessionStorage.getItem(k)); } catch (e) { return null; } }
+function zetSS(k, v) { try { v === null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+let mijnKlas = leesSS(KK);           // { code, dier } van deze cursist
+let lesgeverCode = leesSS(LK);       // klascode die deze lesgever bekijkt
+let pollTimer = null, wisBevestig = false, klasCodeTmp = null;
+const IC_KLAS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20v-1.5A4.5 4.5 0 0 1 7.5 14h3a4.5 4.5 0 0 1 4.5 4.5V20"/><circle cx="17" cy="9" r="2.6"/><path d="M17 14h.5a3.5 3.5 0 0 1 3.5 3.5V20"/></svg>';
+
+async function klasGet(params) { const r = await fetch(KLAS_URL + '?' + new URLSearchParams(params)); return r.json(); }
+async function klasPost(body) {
+  const r = await fetch(KLAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+  return r.json();
+}
+function meldVooruitgang(oef, status) {
+  if (!KLAS_URL || !mijnKlas) return;
+  klasPost({ actie: 'meld', code: mijnKlas.code, dier: mijnKlas.dier, oef, status }).catch(() => {});
+}
+function stopPoll() { clearInterval(pollTimer); pollTimer = null; }
+
+function klasbalkHtml() {
+  if (!KLAS_URL) return '';
+  if (mijnKlas) return `<div class="klasbalk"><span class="klaschip"><span class="dier">${DIER[mijnKlas.dier]}</span> ${esc(mijnKlas.code)}</span>
+    <button type="button" class="rond klein" data-actie="klasweg" aria-label="Uit de klas gaan">✕</button></div>`;
+  return `<div class="klasbalk"><button type="button" class="knop wit" data-actie="klas">${IC_KLAS} Klas</button></div>`;
+}
+
+// Cursist: klascode intypen
+function toonKlasCode(fout) {
+  stopPoll();
+  main.innerHTML = `
+    <div class="oefbalk"><button type="button" class="rond" data-actie="start" aria-label="Terug">${IC.huis}</button></div>
+    <form class="panel" id="codeform" novalidate autocomplete="off">
+      <h1><span class="klasicoon">${IC_KLAS}</span> Klas ${spreekKnop('Klas. Typ de code van de klas.')}</h1>
+      <div class="veld ${fout ? 'fout' : ''}">
+        <div class="vraag"><label for="klascode" class="vraagtekst">Code</label></div>
+        <div class="coderij">
+          <input type="text" id="klascode" class="code" maxlength="4" autocapitalize="characters" autocomplete="off" spellcheck="false" value="${esc(klasCodeTmp || '')}">
+          <button type="submit" class="pijl" aria-label="Verder">${IC.rechts}</button>
+        </div>
+        <div class="melding" role="status">${IC.nok}<span>${fout === 'net' ? 'Geen verbinding' : 'Code niet juist'}</span></div>
+      </div>
+    </form>`;
+  main.querySelector('#klascode').focus();
+}
+
+async function controleerCode(code) {
+  klasCodeTmp = code.toUpperCase().trim();
+  try {
+    const r = await klasGet({ actie: 'klas', code: klasCodeTmp });
+    if (r.fout) return toonKlasCode('code');
+    toonDieren(r.cursisten || {});
+  } catch (e) { toonKlasCode('net'); }
+}
+
+// Cursist: dier kiezen
+function toonDieren(bezet, fout) {
+  main.innerHTML = `
+    <div class="oefbalk"><button type="button" class="rond" data-actie="start" aria-label="Terug">${IC.huis}</button>
+      <span class="klaschip">${IC_KLAS} ${esc(klasCodeTmp)}</span></div>
+    <div class="panel">
+      <h1>Kies een dier ${spreekKnop('Kies een dier.')}</h1>
+      ${fout ? `<p class="melding" style="display:flex">${IC.nok}<span>Kies een ander dier</span></p>` : ''}
+      <div class="dieren">${Object.keys(DIER).map(d => `<button type="button" class="dierknop" data-dier="${d}" ${bezet[d] ? 'disabled' : ''} aria-label="${d}">${DIER[d]}</button>`).join('')}</div>
+    </div>`;
+}
+
+async function kiesDier(dier) {
+  try {
+    const r = await klasPost({ actie: 'meld', code: klasCodeTmp, dier, oef: 0, nieuw: true });
+    if (r.fout === 'bezet') { const k = await klasGet({ actie: 'klas', code: klasCodeTmp }); return toonDieren(k.cursisten || {}, true); }
+    if (r.fout) return toonKlasCode('code');
+    mijnKlas = { code: klasCodeTmp, dier };
+    zetSS(KK, mijnKlas);
+    toonStart();
+  } catch (e) { toonKlasCode('net'); }
+}
+
+// Lesgever: overzicht
+function toonLesgever(melding) {
+  stopPoll(); wisBevestig = false;
+  if (!KLAS_URL) {
+    main.innerHTML = `<div class="oefbalk"><button type="button" class="rond" data-actie="start" aria-label="Terug">${IC.huis}</button></div>
+      <div class="panel"><h1>Klas volgen</h1><p>Live volgen staat nog niet aan. Plak eerst de web-app-URL van Code.gs bij <code>KLAS_URL</code> in deze pagina.</p></div>`;
+    return;
+  }
+  if (!lesgeverCode) {
+    main.innerHTML = `<div class="oefbalk"><button type="button" class="rond" data-actie="start" aria-label="Terug">${IC.huis}</button></div>
+      <div class="panel lesgeverpanel">
+        <h1>Klas volgen</h1>
+        ${melding ? `<p class="melding" style="display:flex">${IC.nok}<span>${esc(melding)}</span></p>` : ''}
+        <button type="button" class="knop" data-actie="nieuweklas">Nieuwe klas maken</button>
+        <form id="lesgeverform" class="bestaande" novalidate autocomplete="off">
+          <label for="lgcode">Of bekijk een klas die al bestaat (bijvoorbeeld van een collega):</label>
+          <div class="coderij"><input type="text" id="lgcode" class="code" maxlength="4" autocapitalize="characters" spellcheck="false">
+          <button type="submit" class="knop wit">Bekijken</button></div>
+        </form>
+        <p class="klein">Er wordt alleen per dier bijgehouden welke oefening bezig, fout of klaar is. Wat cursisten invullen, wordt nooit doorgestuurd. Alles verdwijnt vanzelf 6 uur na de laatste activiteit.</p>
+      </div>`;
+    return;
+  }
+  main.innerHTML = `
+    <div class="oefbalk"><button type="button" class="rond" data-actie="start" aria-label="Terug">${IC.huis}</button>
+      <div class="grotecode"><span>Klascode</span> <strong>${esc(lesgeverCode)}</strong></div></div>
+    <div class="panel lesgeverpanel">
+      <div id="klastabel"><p>Laden…</p></div>
+      <p class="klein" id="bijgewerkt"></p>
+      <div class="knoppen">
+        <button type="button" class="knop wit" data-actie="andereklas">Andere klas</button>
+        <button type="button" class="knop wit gevaar" data-actie="wisklas">Klas wissen</button>
+      </div>
+      <p class="klein">Alleen per dier: welke oefening bezig ●, fout ✘ of klaar ✔ is, met het aantal pogingen. Nooit wat cursisten invullen. Alles verdwijnt 6 uur na de laatste activiteit, of meteen met "Klas wissen".</p>
+    </div>`;
+  laadKlas();
+  pollTimer = setInterval(laadKlas, 5000);
+}
+
+async function laadKlas() {
+  const doel = document.getElementById('klastabel');
+  if (!doel) return stopPoll();
+  try {
+    const r = await klasGet({ actie: 'klas', code: lesgeverCode });
+    if (!document.getElementById('klastabel')) return;
+    if (r.fout) { lesgeverCode = null; zetSS(LK, null); return toonLesgever('Deze klas bestaat niet (meer).'); }
+    const nu = r.nu || Date.now();
+    const rijen = Object.entries(r.cursisten);
+    const cel = (o, actief) => {
+      if (!o) return '<td></td>';
+      const p = o.p > 1 ? `<small>${o.p}×</small>` : '';
+      if (o.s === 'klaar') return `<td class="c-klaar" title="klaar">✔${p}</td>`;
+      if (o.s === 'fout') return `<td class="c-fout ${actief ? 'actief' : ''}" title="fout">✘${o.p > 1 ? `<small>${o.p}×</small>` : ''}</td>`;
+      return `<td class="c-bezig ${actief ? 'actief' : ''}" title="bezig">●</td>`;
+    };
+    doel.innerHTML = rijen.length === 0
+      ? `<p class="leegklas">Nog niemand. Cursisten tikken op <strong>Klas</strong> en typen <strong>${esc(lesgeverCode)}</strong>.</p>`
+      : `<div class="tabelwrap"><table class="klas">
+          <thead><tr><th>Cursist</th>${[1,2,3,4,5,6,7,8].map(n => `<th>${n}</th>`).join('')}</tr></thead>
+          <tbody>${rijen.map(([dier, c]) => {
+            const weg = nu - c.t > 15 * 60 * 1000;
+            return `<tr class="${weg ? 'weg' : ''}"><th scope="row"><span class="dier">${DIER[dier] || ''}</span> ${esc(dier)}</th>${[1,2,3,4,5,6,7,8].map(n => cel(c.o[n], c.nu === n)).join('')}</tr>`;
+          }).join('')}</tbody></table></div>
+          <p class="legende"><span class="c-bezig">●</span> bezig <span class="c-fout">✘</span> nog fouten <span class="c-klaar">✔</span> klaar · <span style="opacity:.5">grijs</span> = 15 min niets gedaan</p>`;
+    document.getElementById('bijgewerkt').textContent = 'Bijgewerkt om ' + new Date().toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' · ververst elke 5 seconden';
+  } catch (e) {
+    const b = document.getElementById('bijgewerkt'); if (b) b.textContent = 'Geen verbinding. Ik probeer het opnieuw…';
+  }
+}
+
+async function klasActie(actie, knop) {
+  if (actie === 'klas') { klasCodeTmp = null; toonKlasCode(); return true; }
+  if (actie === 'klasweg') { mijnKlas = null; zetSS(KK, null); toonStart(); return true; }
+  if (actie === 'lesgever') { location.hash = 'lesgever'; toonLesgever(); return true; }
+  if (actie === 'nieuweklas') {
+    try { const r = await klasGet({ actie: 'nieuw' }); if (r.code) { lesgeverCode = r.code; zetSS(LK, r.code); } toonLesgever(r.code ? '' : 'Lukt niet. Probeer opnieuw.'); }
+    catch (e) { toonLesgever('Geen verbinding met het script.'); }
+    return true;
+  }
+  if (actie === 'andereklas') { lesgeverCode = null; zetSS(LK, null); toonLesgever(); return true; }
+  if (actie === 'wisklas') {
+    if (!wisBevestig) { wisBevestig = true; knop.textContent = 'Zeker? Klik nog eens'; setTimeout(() => { wisBevestig = false; if (knop.isConnected) knop.textContent = 'Klas wissen'; }, 4000); return true; }
+    try { await klasPost({ actie: 'wis', code: lesgeverCode }); } catch (e) {}
+    lesgeverCode = null; zetSS(LK, null); toonLesgever(); return true;
+  }
+  return false;
+}
+
+let state = null;
+const VK = 'ligo-formulier-bt2-klaar';
+function klaarLijst() { try { return JSON.parse(sessionStorage.getItem(VK)) || {}; } catch (e) { return {}; } }
+function zetKlaar(n) { const k = klaarLijst(); k[n] = 1; try { sessionStorage.setItem(VK, JSON.stringify(k)); } catch (e) {} }
+
+const main = document.getElementById('main');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function spreekKnop(tekst) {
+  if (!('speechSynthesis' in window)) return '';
+  return `<button type="button" class="spreek" data-spreek="${esc(tekst)}" aria-label="Lees voor: ${esc(tekst)}">${IC.spreek}</button>`;
+}
+function spreek(t) {
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(t.replace(/\*/g, '').replace(/^Tel\.$/, 'telefoon').replace(/^Nr\.$/, 'nummer'));
+    u.lang = 'nl-BE'; u.rate = 0.85;
+    const stem = speechSynthesis.getVoices().find(v => v.lang === 'nl-BE') || speechSynthesis.getVoices().find(v => v.lang && v.lang.startsWith('nl'));
+    if (stem) u.voice = stem;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+// ---------- Startscherm ----------
+function toonStart() {
+  state = null; stopPoll();
+  if (location.hash === '#lesgever') history.replaceState(null, '', location.pathname + location.search);
+  const klaar = klaarLijst();
+  const kenmerkIcoon = { picto: `<img src="${P.persoon}" alt="">`, hulp: '<span class="k" style="font-weight:700">?</span>',
+    ster: '<span class="k" style="color:var(--rood);font-weight:700;font-size:1.4rem">*</span>', pijl: `<span class="k" style="width:24px">${IC.rechts}</span>` };
+  main.innerHTML = `
+    ${klasbalkHtml()}
+    <h1>Een formulier invullen ${spreekKnop('Een formulier invullen. Kies een oefening.')}</h1>
+    <div class="tegels">
+      ${[1,2,3,4,5,6,7,8].map(n => `
+        <button class="tegel ${klaar[n] ? 'klaar' : ''}" data-oef="${n}" aria-label="Oefening ${n}${klaar[n] ? ', klaar' : ''}">
+          <span class="badge">${IC.vink}</span>
+          ${n}
+          <span class="kenmerken">${OEF[n].kenmerk.map(k => kenmerkIcoon[k]).join('')}</span>
+        </button>`).join('')}
+    </div>
+    <details class="lesgever">
+      <summary>Voor de lesgever</summary>
+      <p>De cursist vult telkens zijn eigen personalia in. Na het versturen ziet hij per vraag een groen vinkje of een rood kruis met een korte uitleg. Een groen vinkje op de tegel betekent: die oefening is één keer helemaal juist gelukt.</p>
+      <ol>
+        <li>Invulvak naast de vraag, met pictogram. Alles op één blad.</li>
+        <li>Invulvak onder de vraag, met pictogram.</li>
+        <li>Adres in stukken: straat, huisnummer, postcode, stad.</li>
+        <li>Eén blad per onderwerp, verder met een pijltje.</li>
+        <li>Zoals 3, maar het pictogram verschijnt pas via de ?-knop.</li>
+        <li>Verplichte velden (*). Alleen die invullen. Pictogram via de ?-knop.</li>
+        <li>Geen pictogrammen. De vragen zijn anders verwoord en er zijn extra vragen. Telkens andere sterretjes.</li>
+        <li>Zelfstandig: meerdere bladen, sterretjes, wisselende vragen en datumvelden. Elke poging is anders.</li>
+      </ol>
+      <p>De luidspreker leest een vraag voor (oefening 1 tot 6). Het woord op de verzendknop wisselt: verzenden, versturen, indienen, bevestigen…</p>
+      <p><strong>Privacy:</strong> wat de cursist invult, blijft in deze browser en verdwijnt zodra hij de oefening verlaat. Het wordt nooit verstuurd of bewaard.</p>
+      ${KLAS_URL ? `<p><strong>Live volgen:</strong> maak een klas en geef de code aan je cursisten. Zij tikken op <em>Klas</em>, typen de code en kiezen een dier. Jij ziet dan per dier welke oefening bezig, fout of klaar is. Meer niet: geen namen, geen ingevulde gegevens. Alles verdwijnt 6 uur na de laatste activiteit. Meerdere lesgevers kunnen elk een eigen klas maken, of samen dezelfde code bekijken.</p>
+      <p><button type="button" class="knop" data-actie="lesgever">${IC_KLAS} Klas volgen</button></p>` : ''}
+    </details>`;
+}
+
+// ---------- Oefening tonen ----------
+function startOefening(n) {
+  stopPoll();
+  state = { n, cfg: maakOefening(n), blad: 0, waarden: {}, uitslag: null };
+  meldVooruitgang(n, 'bezig');
+  toonBlad();
+}
+
+function pictoHtml(sleutel, cfg) {
+  if (!sleutel || cfg.picto === 'geen') return '';
+  if (cfg.picto === 'zien') return `<img class="picto" src="${P[sleutel]}" alt="">`;
+  return `<span class="hulp"><button type="button" class="hulpknop" aria-label="Hulp: toon pictogram">?</button><span class="popup"><img src="${P[sleutel]}" alt=""></span></span>`;
+}
+
+function invoerHtml(it, id) {
+  const W = state.waarden, val = esc(W[it.key] || '');
+  const basis = `autocomplete="off" autocapitalize="off" spellcheck="false"`;
+  switch (it.soort) {
+    case 'radio':
+      return `<div class="keuzes" role="radiogroup" aria-labelledby="${id}-l">${it.opties.map((o, i) =>
+        `<label><input type="radio" name="${id}" data-key="${it.key}" value="${o}" ${W[it.key] === o ? 'checked' : ''}> ${o}</label>`).join('')}</div>`;
+    case 'vink':
+      return `<div class="vink"><label><input type="checkbox" id="${id}" data-key="${it.key}" ${W[it.key] ? 'checked' : ''}> ${esc(it.label)}${it.req ? '<span class="ster">*</span>' : ''}</label></div>`;
+    case 'kies':
+      return `<select id="${id}" data-key="${it.key}"><option value="">Kies…</option>${it.opties.map(o =>
+        `<option ${W[it.key] === o ? 'selected' : ''}>${o}</option>`).join('')}</select>`;
+    case 'telPrefix':
+      return `<div class="telprefix"><span>+32</span><input type="text" id="${id}" data-key="${it.key}" inputmode="tel" ${basis} value="${val}"></div>`;
+    case 'datum3':
+      return `<div class="datum3">${[['d', 'dag', 2], ['m', 'maand', 2], ['j', 'jaar', 4]].map(([s, t, ml]) =>
+        `<div class="${t}"><label for="${id}-${s}">${t}</label><input type="text" id="${id}-${s}" data-key="${it.key}_${s}" inputmode="numeric" maxlength="${ml}" ${basis} value="${esc(W[it.key + '_' + s] || '')}"></div>`).join('')}</div>`;
+    case 'datumKies': {
+      const nu = new Date().getFullYear();
+      const opt = (arr, s) => '<option value=""></option>' + arr.map(x => `<option ${W[it.key + '_' + s] === String(x) ? 'selected' : ''}>${x}</option>`).join('');
+      const r = (a, b) => Array.from({ length: Math.abs(b - a) + 1 }, (_, i) => a < b ? a + i : a - i);
+      return `<div class="datum3">
+        <div><label for="${id}-d">dag</label><select id="${id}-d" data-key="${it.key}_d">${opt(r(1, 31), 'd')}</select></div>
+        <div><label for="${id}-m">maand</label><select id="${id}-m" data-key="${it.key}_m">${opt(r(1, 12), 'm')}</select></div>
+        <div class="jaar"><label for="${id}-j">jaar</label><select id="${id}-j" data-key="${it.key}_j">${opt(r(nu - 10, 1930), 'j')}</select></div></div>`;
+    }
+    default:
+      return `<input type="text" id="${id}" data-key="${it.key}" ${it.mode ? `inputmode="${it.mode}"` : ''} ${it.ph && state.n !== 8 ? `placeholder="${it.ph}"` : ''} ${basis} value="${val}">`;
+  }
+}
+
+function veldHtml(it, cfg) {
+  const id = 'v-' + it.key;
+  const ster = !cfg.alles && it.req ? '<span class="ster" aria-hidden="true">*</span>' : '';
+  const sr = !cfg.alles && it.req ? '<span class="hidden"> (verplicht)</span>' : '';
+  const r = state.uitslag && state.uitslag[it.key];
+  const klasse = r && (r.st === 'fout' || r.st === 'leeg') ? 'fout' : r && r.st === 'teveel' ? 'teveel' : '';
+  const melding = r ? `<div class="melding" role="status">${r.st === 'teveel' ? IC.let : IC.nok}<span>${esc(r.tekst)}</span></div>` : '';
+  if (it.soort === 'vink') {
+    return `<div class="veld ${klasse}" data-veld="${it.key}">${invoerHtml(it, id)}${melding}</div>`;
+  }
+  const labelFor = ['radio', 'datum3', 'datumKies'].includes(it.soort) ? '' : `for="${id}"`;
+  const labelTag = labelFor ? 'label' : 'span';
+  const vraag = `<div class="vraag">
+      ${cfg.picto === 'zien' ? pictoHtml(it.picto, cfg) : ''}
+      <${labelTag} ${labelFor} id="${id}-l" class="vraagtekst">${esc(it.label)}${ster}${sr}</${labelTag}>
+      ${cfg.picto === 'hulp' ? pictoHtml(it.picto, cfg) : ''}
+      ${cfg.spreek ? spreekKnop(it.label) : ''}
+    </div>`;
+  if (cfg.layout === 'naast') {
+    return `<div class="veld naast ${klasse}" data-veld="${it.key}">${vraag}<div class="invul">${invoerHtml(it, id)}${melding}</div></div>`;
+  }
+  return `<div class="veld ${it.kort ? 'kort' : ''} ${klasse}" data-veld="${it.key}">${vraag}${invoerHtml(it, id)}${melding}</div>`;
+}
+
+function groepHtml(g, cfg) {
+  const v = g.velden;
+  let rijen;
+  if (cfg.picto !== 'geen') rijen = v.map(x => veldHtml(x, cfg)).join(''); // met pictogram: elk veld op een eigen rij
+  else if (g.samen) rijen = `${veldHtml(v[0], cfg)}<div class="groepveld pc">${veldHtml(v[1], cfg)}${veldHtml(v[2], cfg)}</div>`;
+  else if (g.metBus) rijen = `<div class="groepveld drie">${veldHtml(v[0], cfg)}${veldHtml(v[1], cfg)}${veldHtml(v[2], cfg)}</div><div class="groepveld pc">${veldHtml(v[3], cfg)}${veldHtml(v[4], cfg)}</div>`;
+  else rijen = `<div class="groepveld">${veldHtml(v[0], cfg)}${veldHtml(v[1], cfg)}</div><div class="groepveld pc">${veldHtml(v[2], cfg)}${veldHtml(v[3], cfg)}</div>`;
+  const icoon = cfg.picto === 'zien' ? `<img class="picto" src="${P[g.picto]}" alt="" style="width:48px;height:48px">` : '';
+  return `<fieldset class="groep"><legend>${icoon}${esc(g.titel)}${cfg.spreek ? spreekKnop(g.titel) : ''}</legend>${rijen}</fieldset>`;
+}
+
+function toonBlad() {
+  const { cfg, n } = state;
+  const klaar = klaarLijst();
+  const items = cfg.bladen[state.blad];
+  const laatste = state.blad === cfg.bladen.length - 1;
+  const meer = cfg.bladen.length > 1;
+
+  let kop = '';
+  if (cfg.blad === 'pijl') kop = `<div class="bladstippen" aria-label="Blad ${state.blad + 1} van ${cfg.bladen.length}">${cfg.bladen.map((_, i) =>
+      `<span class="${i < state.blad ? 'gedaan' : i === state.blad ? 'nu' : ''}"></span>`).join('')}</div>`;
+  if (cfg.blad === 'knop') kop = `<p class="stapteller">Stap ${state.blad + 1} van ${cfg.bladen.length}</p>`;
+
+  const sterUitleg = !cfg.alles && state.blad === 0
+    ? `<p class="uitleg-ster"><span class="ster">*</span> ${n === 6 ? '= invullen' : '= verplicht'} ${n === 6 ? spreekKnop('Sterretje is invullen. Geen sterretje: niet invullen.') : ''}</p>` : '';
+
+  const velden = items.map(it => it.groep ? groepHtml(it, cfg) : veldHtml(it, cfg)).join('');
+  const lichaam = cfg.layout === 'naast' ? `<div class="tabel">${velden}</div>` : velden;
+
+  let knoppen;
+  const verzend = `<button type="submit" class="knop">${cfg.knopIcoon ? IC.verzend : ''}${esc(cfg.knop)}</button>`;
+  if (cfg.blad === 'pijl') {
+    knoppen = `${state.blad > 0 ? `<button type="button" class="pijl terug" data-actie="terug" aria-label="Terug">${IC.links}</button>` : ''}
+      ${laatste ? verzend : `<button type="submit" class="pijl" aria-label="Volgende">${IC.rechts}</button>`}`;
+  } else if (cfg.blad === 'knop') {
+    knoppen = `${state.blad > 0 ? `<button type="button" class="knop wit" data-actie="terug">Vorige</button>` : ''}
+      ${laatste ? `<button type="submit" class="knop">${esc(cfg.knop)}</button>` : `<button type="submit" class="knop">${esc(cfg.volgende)}</button>`}`;
+  } else knoppen = verzend;
+
+  main.innerHTML = `
+    <div class="oefbalk">
+      <button type="button" class="rond" data-actie="start" aria-label="Terug naar de oefeningen">${IC.huis}</button>
+      <div class="oefnummer"><span class="cijfer">${n}</span></div>
+      <div class="stippen" aria-hidden="true">${[1,2,3,4,5,6,7,8].map(i => `<span class="${i === n ? 'nu' : klaar[i] ? 'klaar' : ''}"></span>`).join('')}</div>
+    </div>
+    <form class="panel" id="form" novalidate autocomplete="off">
+      ${kop}${sterUitleg}${lichaam}
+      <div class="knoppen">${knoppen}</div>
+    </form>`;
+  const eerste = main.querySelector('.veld.fout input, .veld.fout select') || (state.blad > 0 || state.uitslag ? main.querySelector('#form input, #form select') : null);
+  if (eerste) eerste.focus();
+}
+
+// ---------- Verzenden en feedback ----------
+function alleVelden() {
+  return state.cfg.bladen.flat().flatMap(it => it.groep ? it.velden : [it]);
+}
+
+function verstuur() {
+  const uitslag = {};
+  alleVelden().forEach(it => uitslag[it.key] = beoordeel(it));
+  state.uitslag = uitslag;
+  const goed = Object.values(uitslag).every(r => r.st === 'ok');
+  if (goed) zetKlaar(state.n);
+  meldVooruitgang(state.n, goed ? 'klaar' : 'fout');
+  toonFeedback(goed);
+}
+
+function toonFeedback(goed) {
+  const { n } = state;
+  const rijen = alleVelden().map(it => {
+    const r = state.uitslag[it.key];
+    const p = it.picto ? `<img class="picto" src="${P[it.picto]}" alt="">` : '<span class="leegpicto"></span>';
+    const icoon = r.st === 'ok' ? IC.ok : r.st === 'teveel' ? IC.let : IC.nok;
+    const label = it.soort === 'vink' ? 'Akkoord' : it.label;
+    return `<li class="${r.st}">${p}<span><span class="naam">${esc(label)}</span>${r.tekst ? `<span class="uitleg">${esc(r.tekst)}</span>` : ''}</span>${icoon}</li>`;
+  }).join('');
+  const aantalFout = Object.values(state.uitslag).filter(r => r.st !== 'ok').length;
+  main.innerHTML = `
+    <div class="oefbalk">
+      <button type="button" class="rond" data-actie="start" aria-label="Terug naar de oefeningen">${IC.huis}</button>
+      <div class="oefnummer"><span class="cijfer">${n}</span></div>
+    </div>
+    <div class="panel">
+      <div class="uitslag ${goed ? 'goed' : 'niet'}" role="status">
+        ${goed ? IC.grootGoed : IC.grootNiet}
+        <h2>${goed ? 'Goed zo!' : 'Nog niet goed'} ${spreekKnop(goed ? 'Goed zo! Alles is juist.' : 'Nog niet goed. Kijk naar de rode kruisjes.')}</h2>
+        ${goed ? `<div style="margin-top:8px">${IC.duim}</div>` : `<p style="margin:6px 0 0;font-size:1.2rem">${aantalFout} × ${IC.nok.replace('class="st"', 'class="st" style="width:28px;height:28px;vertical-align:middle"')}</p>`}
+      </div>
+      <ul class="lijst">${rijen}</ul>
+      <div class="knoppen">
+        ${goed
+          ? `${n < 8 ? `<button type="button" class="knop" data-actie="volgende">Oefening ${n + 1} ${IC.rechts}</button>` : ''}
+             <button type="button" class="knop wit" data-actie="opnieuw">${IC.opnieuw} Nog eens</button>`
+          : `<button type="button" class="knop" data-actie="verbeter">${IC.potlood} Verbeteren</button>
+             <button type="button" class="knop wit" data-actie="opnieuw">${IC.opnieuw} Opnieuw</button>`}
+      </div>
+    </div>`;
+  window.scrollTo(0, 0);
+  main.querySelector('.knoppen .knop').focus({ preventScroll: true });
+}
+
+function verbeter() {
+  // naar het eerste blad met een fout
+  const idx = state.cfg.bladen.findIndex(b => b.flatMap(it => it.groep ? it.velden : [it]).some(it => state.uitslag[it.key].st !== 'ok'));
+  state.blad = Math.max(0, idx);
+  toonBlad();
+}
+
+// ---------- Gebeurtenissen ----------
+main.addEventListener('click', e => {
+  const t = e.target.closest('button');
+  if (!t) return;
+  if (t.dataset.spreek) { spreek(t.dataset.spreek); return; }
+  if (t.classList.contains('hulpknop')) {
+    const h = t.parentElement;
+    h.classList.add('toon');
+    clearTimeout(h._t); h._t = setTimeout(() => h.classList.remove('toon'), 3000);
+    return;
+  }
+  if (t.dataset.dier) { kiesDier(t.dataset.dier); return; }
+  if (t.dataset.actie && ['klas', 'klasweg', 'lesgever', 'nieuweklas', 'andereklas', 'wisklas'].includes(t.dataset.actie)) { klasActie(t.dataset.actie, t); return; }
+  if (t.dataset.oef) { startOefening(+t.dataset.oef); window.scrollTo(0, 0); return; }
+  switch (t.dataset.actie) {
+    case 'start': toonStart(); window.scrollTo(0, 0); break;
+    case 'terug': state.blad--; toonBlad(); break;
+    case 'volgende': startOefening(state.n + 1); window.scrollTo(0, 0); break;
+    case 'opnieuw': startOefening(state.n); window.scrollTo(0, 0); break;
+    case 'verbeter': verbeter(); break;
+  }
+});
+main.addEventListener('submit', e => {
+  e.preventDefault();
+  if (e.target.id === 'codeform') { controleerCode(document.getElementById('klascode').value); return; }
+  if (e.target.id === 'lesgeverform') { const c = document.getElementById('lgcode').value.toUpperCase().trim(); lesgeverCode = c; zetSS(LK, c); toonLesgever(); return; }
+  if (!state) return;
+  if (state.blad < state.cfg.bladen.length - 1) { state.blad++; toonBlad(); window.scrollTo(0, 0); }
+  else verstuur();
+});
+function bewaarInGeheugen(e) {
+  const el = e.target, key = el.dataset && el.dataset.key;
+  if (!key || !state) return;
+  state.waarden[key] = el.type === 'checkbox' ? el.checked : el.value;
+  // na verbeteren: rode markering weg zodra de cursist iets aanpast
+  const v = el.closest('.veld');
+  if (v && (v.classList.contains('fout') || v.classList.contains('teveel'))) v.classList.remove('fout', 'teveel');
+  if (state.uitslag) delete state.uitslag[key.replace(/_[dmj]$/, '')];
+}
+main.addEventListener('input', bewaarInGeheugen);
+main.addEventListener('change', bewaarInGeheugen);
+
+if ('speechSynthesis' in window) speechSynthesis.getVoices();
+window.addEventListener('hashchange', () => { if (location.hash === '#lesgever') toonLesgever(); });
+if (location.hash === '#lesgever') toonLesgever(); else toonStart();
+</script>
+</body>
+</html>

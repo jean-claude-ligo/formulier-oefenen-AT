@@ -112,6 +112,7 @@
   input:focus, select:focus { outline: none; border-color: var(--blauw); box-shadow: 0 0 0 4px rgba(5,97,129,.2); }
   input::placeholder { color: #8a9499; }
   .kort input[type=text] { max-width: 180px; }
+  .adres2 { display: grid; gap: 10px; }
 
   /* Oefening 1: invulveld naast de vraag (zoals de tabel op papier) */
   .tabel { border: 2px solid var(--ink); border-radius: 4px; }
@@ -273,6 +274,7 @@ const F = {
   voornaam:      { label: 'Voornaam', picto: 'persoon', check: 'naam' },
   familienaam:   { label: 'Familienaam', picto: 'familie', check: 'naam' },
   adres:         { label: 'Adres', picto: 'huis', check: 'adres' },
+  adres2:        { label: 'Adres', picto: 'huis', soort: 'adres2', check: 'adres2' },
   straat:        { label: 'Straat', picto: 'straat', check: 'straat' },
   huisnummer:    { label: 'Huisnummer', picto: 'huisnr', check: 'huisnr', kort: true },
   bus:           { label: 'Bus', check: 'vrij', kort: true },
@@ -359,7 +361,8 @@ function maakOefening(n) {
 }
 
 function bouwOefening(n) {
-  const basis = () => ['voornaam', 'familienaam', 'adres', 'telefoon', 'nationaliteit', 'geboortedatum', 'email'].map(k => veld(k));
+  // Oefening 1 en 2: één vraag "adres" met twee invulvakken (straat + nummer, postcode + stad)
+  const basis = () => ['voornaam', 'familienaam', 'adres2', 'telefoon', 'nationaliteit', 'geboortedatum', 'email'].map(k => veld(k));
   const gesplitst = () => [veld('voornaam'), veld('familienaam'), adresGroep(), veld('telefoon'), veld('nationaliteit'), veld('geboortedatum'), veld('email')];
   const c = { n, layout: 'onder', picto: 'zien', spreek: true, alles: true, knopIcoon: true, blad: 'een' };
   switch (n) {
@@ -423,6 +426,19 @@ function controle(it, v) {
       if (!/^\d/.test(v)) return 'Begin met een cijfer';
       if (!/^\d{1,4}\s*[a-z]?\s*((bus|b\.?|\/|-)?\s*[a-z0-9]{1,5})?$/i.test(v)) return 'Alleen het nummer';
       return null;
+    case 'adres2': {
+      const [boven, onder] = v.split('\n');
+      if (/^\d{4}\b/.test(boven) && /\p{L}{2,}/u.test(onder) && /\d/.test(onder)) return 'Omgekeerd: eerst straat en nummer';
+      if (!/\p{L}{2,}/u.test(boven)) return 'Vak 1: straat en nummer';
+      if (!/\d/.test(boven)) return 'Vak 1: het nummer ontbreekt';
+      if (!/\d/.test(onder)) return 'Vak 2: de postcode ontbreekt';
+      if (!/\p{L}{2,}/u.test(onder)) return 'Vak 2: de stad ontbreekt';
+      if (!/^\d/.test(onder)) return 'Vak 2: eerst de postcode. Zo: 8800 Roeselare';
+      if (!/^\d{4}(?!\d)/.test(onder)) return 'Vak 2: postcode = 4 cijfers';
+      const stad = onder.replace(/^\d{4}[\s,]*/, '');
+      if (/\d/.test(stad)) return 'Vak 2: geen cijfers in de stad';
+      return null;
+    }
     case 'postcode':
       return /^\d{4}$/.test(v) ? null : '4 cijfers. Zo: 8800';
     case 'stad':
@@ -470,6 +486,12 @@ function waardeVan(it) {
     if (!d || !m || !j) return { half: true };
     return d + '/' + m + '/' + j;
   }
+  if (it.soort === 'adres2') {
+    const a = (W[it.key + '_1'] || '').trim(), b = (W[it.key + '_2'] || '').trim();
+    if (!a && !b) return '';
+    if (!a || !b) return { half: true };
+    return a + '\n' + b;
+  }
   if (it.soort === 'vink') return W[it.key] ? 'ja' : '';
   return (W[it.key] || '').trim();
 }
@@ -481,7 +503,7 @@ function beoordeel(it) {
   if (nodig && !ingevuld) return { st: 'leeg', tekst: it.soort === 'vink' ? 'Aanvinken' : 'Vergeten' };
   if (!nodig && ingevuld) return { st: 'teveel', tekst: 'Niet nodig: geen *' };
   if (!nodig) return { st: 'ok', tekst: 'Goed: leeg gelaten' };
-  if (v.half) return { st: 'fout', tekst: 'Dag, maand en jaar' };
+  if (v.half) return { st: 'fout', tekst: it.soort === 'adres2' ? 'Vul de 2 vakken in' : 'Dag, maand en jaar' };
   const f = controle(it, v);
   return f ? { st: 'fout', tekst: f } : { st: 'ok', tekst: '' };
 }
@@ -530,8 +552,8 @@ function toonStart() {
       <summary>Voor de lesgever</summary>
       <p>De cursist vult telkens zijn eigen personalia in. Na het versturen ziet hij per vraag een groen vinkje of een rood kruis met een korte uitleg. Een groen vinkje op de tegel betekent: die oefening is één keer helemaal juist gelukt.</p>
       <ol>
-        <li>Invulvak naast de vraag, met pictogram. Alles op één blad. Oefening 1 tot 3 zonder hoofdletters.</li>
-        <li>Invulvak onder de vraag, met pictogram.</li>
+        <li>Invulvak naast de vraag, met pictogram. Alles op één blad. Oefening 1 tot 3 zonder hoofdletters. Bij adres zijn er 2 vakken: straat en nummer, daaronder postcode en stad.</li>
+        <li>Invulvak onder de vraag, met pictogram. Adres met 2 vakken, zoals in 1.</li>
         <li>Adres in stukken: straat, huisnummer, postcode, stad.</li>
         <li>Eén blad per onderwerp, verder met een pijltje.</li>
         <li>Zoals 3, maar het pictogram verschijnt pas via de ?-knop.</li>
@@ -568,6 +590,9 @@ function invoerHtml(it, id) {
     case 'kies':
       return `<select id="${id}" data-key="${it.key}"><option value="">Kies…</option>${it.opties.map(o =>
         `<option ${W[it.key] === o ? 'selected' : ''}>${o}</option>`).join('')}</select>`;
+    case 'adres2':
+      return `<div class="adres2">${[1, 2].map(i =>
+        `<input type="text" id="${i === 1 ? id : id + '-' + i}" data-key="${it.key}_${i}" ${basis} value="${esc(W[it.key + '_' + i] || '')}"${i === 2 ? ` aria-label="${esc(it.label)}, tweede vak"` : ''}>`).join('')}</div>`;
     case 'telPrefix':
       return `<div class="telprefix"><span>+32</span><input type="text" id="${id}" data-key="${it.key}" inputmode="tel" ${basis} value="${val}"></div>`;
     case 'datum3':

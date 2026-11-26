@@ -154,7 +154,7 @@
     background: #fff; border: 3px solid var(--blauw); border-radius: 10px; padding: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.18);
   }
   .hulp .popup img { width: 110px; height: 110px; display: block; object-fit: contain; }
-  .hulp:hover .popup, .hulp.toon .popup { display: block; }
+  .hulp.toon .popup { display: block; }
 
   /* Voorleesknop */
   .spreek {
@@ -216,45 +216,6 @@
     .picto { width: 52px; height: 52px; }
     .stippen { margin-left: 0; width: 100%; }
   }
-  /* ---------- Klas (live volgen) ---------- */
-  .klasbalk { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin: -6px 0 14px; }
-  .klasbalk .knop svg, .klasicoon svg { width: 30px; height: 30px; }
-  .klasicoon { display: inline-flex; }
-  .klaschip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 30px; background: var(--paper); border: 2px solid var(--blauw); font-weight: 700; color: var(--blauw); }
-  .klaschip svg { width: 24px; height: 24px; }
-  .klaschip .dier { font-size: 1.8rem; line-height: 1; }
-  .rond.klein { width: 40px; height: 40px; font-size: 1.1rem; }
-  .coderij { display: flex; gap: 12px; align-items: stretch; }
-  input.code { max-width: 220px; font-size: 2rem !important; letter-spacing: .25em; text-transform: uppercase; text-align: center; font-weight: 700; }
-  .dieren { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
-  .dierknop { font-size: 2.8rem; aspect-ratio: 1 / 1; border: 3px solid var(--line); border-radius: 12px; background: #fff; padding: 0; }
-  .dierknop:hover:not(:disabled) { border-color: var(--blauw); background: var(--ijsblauw); }
-  .dierknop:focus-visible { outline: 4px solid var(--turkoois); outline-offset: 2px; }
-  .dierknop:disabled { opacity: .18; cursor: not-allowed; }
-  .lesgeverpanel { font-size: 1rem; }
-  .lesgeverpanel .bestaande { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
-  .lesgeverpanel .bestaande label { display: block; margin-bottom: 8px; }
-  .lesgeverpanel .melding { color: var(--rood); }
-  .klein { font-size: .9rem; color: var(--grijs); }
-  .grotecode { margin-left: auto; display: flex; align-items: baseline; gap: 12px; color: var(--blauw); }
-  .grotecode span { font-size: 1rem; color: var(--grijs); }
-  .grotecode strong { font-size: 2.6rem; letter-spacing: .15em; }
-  .tabelwrap { overflow-x: auto; }
-  table.klas { border-collapse: collapse; width: 100%; min-width: 520px; }
-  table.klas th, table.klas td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: center; }
-  table.klas thead th { color: var(--blauw); font-size: 1.1rem; }
-  table.klas tbody th { text-align: left; font-weight: 700; white-space: nowrap; }
-  table.klas .dier { font-size: 1.6rem; vertical-align: middle; }
-  table.klas td { font-size: 1.3rem; font-weight: 700; width: 9%; }
-  table.klas td small { display: block; font-size: .75rem; font-weight: 400; color: var(--grijs); }
-  table.klas td.actief { box-shadow: inset 0 0 0 3px var(--blauw); border-radius: 6px; }
-  table.klas tr.weg { opacity: .45; }
-  .c-klaar { color: var(--groen); } .c-fout { color: var(--rood); } .c-bezig { color: var(--turkoois); }
-  td.c-klaar { background: var(--mint-licht); } td.c-fout { background: #fff1ec; }
-  .legende { font-size: .9rem; color: var(--grijs); display: flex; gap: 6px 10px; flex-wrap: wrap; }
-  .leegklas { font-size: 1.1rem; }
-  .knop.gevaar { border-color: var(--rood); color: var(--rood); }
-  @media (max-width: 640px) { .dieren { grid-template-columns: repeat(4, 1fr); } .grotecode strong { font-size: 2rem; } }
 </style>
 </head>
 <body>
@@ -388,6 +349,16 @@ const OEF = {
 };
 
 function maakOefening(n) {
+  const c = bouwOefening(n);
+  // Oefening 1 tot 3: alles in kleine letters, zoals op het papieren blad
+  if (n <= 3) c.bladen.flat().forEach(it => {
+    if (it.groep) { it.titel = it.titel.toLowerCase(); it.velden.forEach(v => v.label = v.label.toLowerCase()); }
+    else it.label = it.label.toLowerCase();
+  });
+  return c;
+}
+
+function bouwOefening(n) {
   const basis = () => ['voornaam', 'familienaam', 'adres', 'telefoon', 'nationaliteit', 'geboortedatum', 'email'].map(k => veld(k));
   const gesplitst = () => [veld('voornaam'), veld('familienaam'), adresGroep(), veld('telefoon'), veld('nationaliteit'), veld('geboortedatum'), veld('email')];
   const c = { n, layout: 'onder', picto: 'zien', spreek: true, alles: true, knopIcoon: true, blad: 'een' };
@@ -405,14 +376,14 @@ function maakOefening(n) {
       return Object.assign(c, { picto: 'hulp', alles: false, bladen: [items], knop: 'Indienen' });
     }
     case 7: {
-      const items = [metLabel('voornaam'), metLabel('familienaam'), metLabel('geslacht'), variabelAdres(false),
-        metLabel('telefoon'), metLabel('email'), metLabel('nationaliteit'), metLabel('geboortedatum'), metLabel('moedertaal')];
+      const items = [metLabel('voornaam'), metLabel('familienaam'), variabelAdres(false),
+        metLabel('telefoon'), metLabel('email'), metLabel('nationaliteit'), metLabel('geboortedatum')];
       zetSterren(items);
       return Object.assign(c, { picto: 'geen', spreek: false, alles: false, knopIcoon: false, bladen: [items], knop: kies(V.verzend) });
     }
     case 8: {
       const namen = [metLabel('voornaam'), metLabel('familienaam')];
-      if (Math.random() < 0.6) namen.push(metLabel('geslacht'));
+      namen.push(metLabel('geslacht'));
       const datumSoort = kies(['tekst', 'datum3', 'datumKies']);
       const datum = metLabel('geboortedatum', datumSoort === 'tekst' ? {} : { soort: datumSoort });
       const tel = metLabel('telefoon', Math.random() < 0.5 ? { soort: 'telPrefix', check: 'telLokaal' } : {});
@@ -516,177 +487,6 @@ function beoordeel(it) {
 }
 
 // ---------- Toestand ----------
-
-// ---------- Klas volgen (optioneel) ----------
-// Plak hier de web-app-URL van Code.gs (eindigt op /exec). Leeg laten = geen live volgen, dan verdwijnt de klasknop.
-const KLAS_URL = 'https://script.google.com/macros/s/AKfycbzV_aHeQ4bsKRgwg_jjCzAdolcwqchJ7YrUClWFvD_FN752Ms-C_zVXzW9onu5OEgiu/exec';
-const DIER = { kat: '🐱', hond: '🐶', leeuw: '🦁', olifant: '🐘', kikker: '🐸', aap: '🐵', panda: '🐼', konijn: '🐰', vos: '🦊', tijger: '🐯',
-  koe: '🐮', varken: '🐷', kip: '🐔', schildpad: '🐢', vis: '🐟', vlinder: '🦋', uil: '🦉', beer: '🐻', paard: '🐴', muis: '🐭' };
-const KK = 'ligo-formulier-bt2-klas', LK = 'ligo-formulier-bt2-lesgever';
-function leesSS(k) { try { return JSON.parse(sessionStorage.getItem(k)); } catch (e) { return null; } }
-function zetSS(k, v) { try { v === null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-let mijnKlas = leesSS(KK);           // { code, dier } van deze cursist
-let lesgeverCode = leesSS(LK);       // klascode die deze lesgever bekijkt
-let pollTimer = null, wisBevestig = false, klasCodeTmp = null;
-const IC_KLAS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20v-1.5A4.5 4.5 0 0 1 7.5 14h3a4.5 4.5 0 0 1 4.5 4.5V20"/><circle cx="17" cy="9" r="2.6"/><path d="M17 14h.5a3.5 3.5 0 0 1 3.5 3.5V20"/></svg>';
-
-async function klasGet(params) { const r = await fetch(KLAS_URL + '?' + new URLSearchParams(params)); return r.json(); }
-async function klasPost(body) {
-  const r = await fetch(KLAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
-  return r.json();
-}
-function meldVooruitgang(oef, status) {
-  if (!KLAS_URL || !mijnKlas) return;
-  klasPost({ actie: 'meld', code: mijnKlas.code, dier: mijnKlas.dier, oef, status }).catch(() => {});
-}
-function stopPoll() { clearInterval(pollTimer); pollTimer = null; }
-
-function klasbalkHtml() {
-  if (!KLAS_URL) return '';
-  if (mijnKlas) return `<div class="klasbalk"><span class="klaschip"><span class="dier">${DIER[mijnKlas.dier]}</span> ${esc(mijnKlas.code)}</span>
-    <button type="button" class="rond klein" data-actie="klasweg" aria-label="Uit de klas gaan">✕</button></div>`;
-  return `<div class="klasbalk"><button type="button" class="knop wit" data-actie="klas">${IC_KLAS} Klas</button></div>`;
-}
-
-// Cursist: klascode intypen
-function toonKlasCode(fout) {
-  stopPoll();
-  main.innerHTML = `
-    <div class="oefbalk"><button type="button" class="rond" data-actie="start" aria-label="Terug">${IC.huis}</button></div>
-    <form class="panel" id="codeform" novalidate autocomplete="off">
-      <h1><span class="klasicoon">${IC_KLAS}</span> Klas ${spreekKnop('Klas. Typ de code van de klas.')}</h1>
-      <div class="veld ${fout ? 'fout' : ''}">
-        <div class="vraag"><label for="klascode" class="vraagtekst">Code</label></div>
-        <div class="coderij">
-          <input type="text" id="klascode" class="code" maxlength="4" autocapitalize="characters" autocomplete="off" spellcheck="false" value="${esc(klasCodeTmp || '')}">
-          <button type="submit" class="pijl" aria-label="Verder">${IC.rechts}</button>
-        </div>
-        <div class="melding" role="status">${IC.nok}<span>${fout === 'net' ? 'Geen verbinding' : 'Code niet juist'}</span></div>
-      </div>
-    </form>`;
-  main.querySelector('#klascode').focus();
-}
-
-async function controleerCode(code) {
-  klasCodeTmp = code.toUpperCase().trim();
-  try {
-    const r = await klasGet({ actie: 'klas', code: klasCodeTmp });
-    if (r.fout) return toonKlasCode('code');
-    toonDieren(r.cursisten || {});
-  } catch (e) { toonKlasCode('net'); }
-}
-
-// Cursist: dier kiezen
-function toonDieren(bezet, fout) {
-  main.innerHTML = `
-    <div class="oefbalk"><button type="button" class="rond" data-actie="start" aria-label="Terug">${IC.huis}</button>
-      <span class="klaschip">${IC_KLAS} ${esc(klasCodeTmp)}</span></div>
-    <div class="panel">
-      <h1>Kies een dier ${spreekKnop('Kies een dier.')}</h1>
-      ${fout ? `<p class="melding" style="display:flex">${IC.nok}<span>Kies een ander dier</span></p>` : ''}
-      <div class="dieren">${Object.keys(DIER).map(d => `<button type="button" class="dierknop" data-dier="${d}" ${bezet[d] ? 'disabled' : ''} aria-label="${d}">${DIER[d]}</button>`).join('')}</div>
-    </div>`;
-}
-
-async function kiesDier(dier) {
-  try {
-    const r = await klasPost({ actie: 'meld', code: klasCodeTmp, dier, oef: 0, nieuw: true });
-    if (r.fout === 'bezet') { const k = await klasGet({ actie: 'klas', code: klasCodeTmp }); return toonDieren(k.cursisten || {}, true); }
-    if (r.fout) return toonKlasCode('code');
-    mijnKlas = { code: klasCodeTmp, dier };
-    zetSS(KK, mijnKlas);
-    toonStart();
-  } catch (e) { toonKlasCode('net'); }
-}
-
-// Lesgever: overzicht
-function toonLesgever(melding) {
-  stopPoll(); wisBevestig = false;
-  if (!KLAS_URL) {
-    main.innerHTML = `<div class="oefbalk"><button type="button" class="rond" data-actie="start" aria-label="Terug">${IC.huis}</button></div>
-      <div class="panel"><h1>Klas volgen</h1><p>Live volgen staat nog niet aan. Plak eerst de web-app-URL van Code.gs bij <code>KLAS_URL</code> in deze pagina.</p></div>`;
-    return;
-  }
-  if (!lesgeverCode) {
-    main.innerHTML = `<div class="oefbalk"><button type="button" class="rond" data-actie="start" aria-label="Terug">${IC.huis}</button></div>
-      <div class="panel lesgeverpanel">
-        <h1>Klas volgen</h1>
-        ${melding ? `<p class="melding" style="display:flex">${IC.nok}<span>${esc(melding)}</span></p>` : ''}
-        <button type="button" class="knop" data-actie="nieuweklas">Nieuwe klas maken</button>
-        <form id="lesgeverform" class="bestaande" novalidate autocomplete="off">
-          <label for="lgcode">Of bekijk een klas die al bestaat (bijvoorbeeld van een collega):</label>
-          <div class="coderij"><input type="text" id="lgcode" class="code" maxlength="4" autocapitalize="characters" spellcheck="false">
-          <button type="submit" class="knop wit">Bekijken</button></div>
-        </form>
-        <p class="klein">Er wordt alleen per dier bijgehouden welke oefening bezig, fout of klaar is. Wat cursisten invullen, wordt nooit doorgestuurd. Alles verdwijnt vanzelf 6 uur na de laatste activiteit.</p>
-      </div>`;
-    return;
-  }
-  main.innerHTML = `
-    <div class="oefbalk"><button type="button" class="rond" data-actie="start" aria-label="Terug">${IC.huis}</button>
-      <div class="grotecode"><span>Klascode</span> <strong>${esc(lesgeverCode)}</strong></div></div>
-    <div class="panel lesgeverpanel">
-      <div id="klastabel"><p>Laden…</p></div>
-      <p class="klein" id="bijgewerkt"></p>
-      <div class="knoppen">
-        <button type="button" class="knop wit" data-actie="andereklas">Andere klas</button>
-        <button type="button" class="knop wit gevaar" data-actie="wisklas">Klas wissen</button>
-      </div>
-      <p class="klein">Alleen per dier: welke oefening bezig ●, fout ✘ of klaar ✔ is, met het aantal pogingen. Nooit wat cursisten invullen. Alles verdwijnt 6 uur na de laatste activiteit, of meteen met "Klas wissen".</p>
-    </div>`;
-  laadKlas();
-  pollTimer = setInterval(laadKlas, 5000);
-}
-
-async function laadKlas() {
-  const doel = document.getElementById('klastabel');
-  if (!doel) return stopPoll();
-  try {
-    const r = await klasGet({ actie: 'klas', code: lesgeverCode });
-    if (!document.getElementById('klastabel')) return;
-    if (r.fout) { lesgeverCode = null; zetSS(LK, null); return toonLesgever('Deze klas bestaat niet (meer).'); }
-    const nu = r.nu || Date.now();
-    const rijen = Object.entries(r.cursisten);
-    const cel = (o, actief) => {
-      if (!o) return '<td></td>';
-      const p = o.p > 1 ? `<small>${o.p}×</small>` : '';
-      if (o.s === 'klaar') return `<td class="c-klaar" title="klaar">✔${p}</td>`;
-      if (o.s === 'fout') return `<td class="c-fout ${actief ? 'actief' : ''}" title="fout">✘${o.p > 1 ? `<small>${o.p}×</small>` : ''}</td>`;
-      return `<td class="c-bezig ${actief ? 'actief' : ''}" title="bezig">●</td>`;
-    };
-    doel.innerHTML = rijen.length === 0
-      ? `<p class="leegklas">Nog niemand. Cursisten tikken op <strong>Klas</strong> en typen <strong>${esc(lesgeverCode)}</strong>.</p>`
-      : `<div class="tabelwrap"><table class="klas">
-          <thead><tr><th>Cursist</th>${[1,2,3,4,5,6,7,8].map(n => `<th>${n}</th>`).join('')}</tr></thead>
-          <tbody>${rijen.map(([dier, c]) => {
-            const weg = nu - c.t > 15 * 60 * 1000;
-            return `<tr class="${weg ? 'weg' : ''}"><th scope="row"><span class="dier">${DIER[dier] || ''}</span> ${esc(dier)}</th>${[1,2,3,4,5,6,7,8].map(n => cel(c.o[n], c.nu === n)).join('')}</tr>`;
-          }).join('')}</tbody></table></div>
-          <p class="legende"><span class="c-bezig">●</span> bezig <span class="c-fout">✘</span> nog fouten <span class="c-klaar">✔</span> klaar · <span style="opacity:.5">grijs</span> = 15 min niets gedaan</p>`;
-    document.getElementById('bijgewerkt').textContent = 'Bijgewerkt om ' + new Date().toLocaleTimeString('nl-BE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' · ververst elke 5 seconden';
-  } catch (e) {
-    const b = document.getElementById('bijgewerkt'); if (b) b.textContent = 'Geen verbinding. Ik probeer het opnieuw…';
-  }
-}
-
-async function klasActie(actie, knop) {
-  if (actie === 'klas') { klasCodeTmp = null; toonKlasCode(); return true; }
-  if (actie === 'klasweg') { mijnKlas = null; zetSS(KK, null); toonStart(); return true; }
-  if (actie === 'lesgever') { location.hash = 'lesgever'; toonLesgever(); return true; }
-  if (actie === 'nieuweklas') {
-    try { const r = await klasGet({ actie: 'nieuw' }); if (r.code) { lesgeverCode = r.code; zetSS(LK, r.code); } toonLesgever(r.code ? '' : 'Lukt niet. Probeer opnieuw.'); }
-    catch (e) { toonLesgever('Geen verbinding met het script.'); }
-    return true;
-  }
-  if (actie === 'andereklas') { lesgeverCode = null; zetSS(LK, null); toonLesgever(); return true; }
-  if (actie === 'wisklas') {
-    if (!wisBevestig) { wisBevestig = true; knop.textContent = 'Zeker? Klik nog eens'; setTimeout(() => { wisBevestig = false; if (knop.isConnected) knop.textContent = 'Klas wissen'; }, 4000); return true; }
-    try { await klasPost({ actie: 'wis', code: lesgeverCode }); } catch (e) {}
-    lesgeverCode = null; zetSS(LK, null); toonLesgever(); return true;
-  }
-  return false;
-}
-
 let state = null;
 const VK = 'ligo-formulier-bt2-klaar';
 function klaarLijst() { try { return JSON.parse(sessionStorage.getItem(VK)) || {}; } catch (e) { return {}; } }
@@ -712,13 +512,11 @@ function spreek(t) {
 
 // ---------- Startscherm ----------
 function toonStart() {
-  state = null; stopPoll();
-  if (location.hash === '#lesgever') history.replaceState(null, '', location.pathname + location.search);
+  state = null;
   const klaar = klaarLijst();
   const kenmerkIcoon = { picto: `<img src="${P.persoon}" alt="">`, hulp: '<span class="k" style="font-weight:700">?</span>',
     ster: '<span class="k" style="color:var(--rood);font-weight:700;font-size:1.4rem">*</span>', pijl: `<span class="k" style="width:24px">${IC.rechts}</span>` };
   main.innerHTML = `
-    ${klasbalkHtml()}
     <h1>Een formulier invullen ${spreekKnop('Een formulier invullen. Kies een oefening.')}</h1>
     <div class="tegels">
       ${[1,2,3,4,5,6,7,8].map(n => `
@@ -732,27 +530,23 @@ function toonStart() {
       <summary>Voor de lesgever</summary>
       <p>De cursist vult telkens zijn eigen personalia in. Na het versturen ziet hij per vraag een groen vinkje of een rood kruis met een korte uitleg. Een groen vinkje op de tegel betekent: die oefening is één keer helemaal juist gelukt.</p>
       <ol>
-        <li>Invulvak naast de vraag, met pictogram. Alles op één blad.</li>
+        <li>Invulvak naast de vraag, met pictogram. Alles op één blad. Oefening 1 tot 3 zonder hoofdletters.</li>
         <li>Invulvak onder de vraag, met pictogram.</li>
         <li>Adres in stukken: straat, huisnummer, postcode, stad.</li>
         <li>Eén blad per onderwerp, verder met een pijltje.</li>
         <li>Zoals 3, maar het pictogram verschijnt pas via de ?-knop.</li>
         <li>Verplichte velden (*). Alleen die invullen. Pictogram via de ?-knop.</li>
-        <li>Geen pictogrammen. De vragen zijn anders verwoord en er zijn extra vragen. Telkens andere sterretjes.</li>
-        <li>Zelfstandig: meerdere bladen, sterretjes, wisselende vragen en datumvelden. Elke poging is anders.</li>
+        <li>Geen pictogrammen. De vragen zijn anders verwoord. Telkens andere sterretjes. Bij een fout verschijnt het pictogram wel.</li>
+        <li>Zelfstandig: meerdere bladen, sterretjes, wisselende vragen en datumvelden, en extra vragen (geslacht, moedertaal). Elke poging is anders.</li>
       </ol>
       <p>De luidspreker leest een vraag voor (oefening 1 tot 6). Het woord op de verzendknop wisselt: verzenden, versturen, indienen, bevestigen…</p>
-      <p><strong>Privacy:</strong> wat de cursist invult, blijft in deze browser en verdwijnt zodra hij de oefening verlaat. Het wordt nooit verstuurd of bewaard.</p>
-      ${KLAS_URL ? `<p><strong>Live volgen:</strong> maak een klas en geef de code aan je cursisten. Zij tikken op <em>Klas</em>, typen de code en kiezen een dier. Jij ziet dan per dier welke oefening bezig, fout of klaar is. Meer niet: geen namen, geen ingevulde gegevens. Alles verdwijnt 6 uur na de laatste activiteit. Meerdere lesgevers kunnen elk een eigen klas maken, of samen dezelfde code bekijken.</p>
-      <p><button type="button" class="knop" data-actie="lesgever">${IC_KLAS} Klas volgen</button></p>` : ''}
+      <p><strong>Privacy:</strong> wat de cursist invult, blijft in deze browser en verdwijnt zodra hij de oefening verlaat. Er wordt niets verstuurd of bewaard. Alleen welke tegels groen zijn, onthoudt het tabblad tot het gesloten wordt.</p>
     </details>`;
 }
 
 // ---------- Oefening tonen ----------
 function startOefening(n) {
-  stopPoll();
   state = { n, cfg: maakOefening(n), blad: 0, waarden: {}, uitslag: null };
-  meldVooruitgang(n, 'bezig');
   toonBlad();
 }
 
@@ -806,7 +600,7 @@ function veldHtml(it, cfg) {
   const labelFor = ['radio', 'datum3', 'datumKies'].includes(it.soort) ? '' : `for="${id}"`;
   const labelTag = labelFor ? 'label' : 'span';
   const vraag = `<div class="vraag">
-      ${cfg.picto === 'zien' ? pictoHtml(it.picto, cfg) : ''}
+      ${cfg.picto === 'zien' ? pictoHtml(it.picto, cfg) : (cfg.picto === 'geen' && klasse === 'fout' && it.picto ? `<img class="picto" src="${P[it.picto]}" alt="">` : '')}
       <${labelTag} ${labelFor} id="${id}-l" class="vraagtekst">${esc(it.label)}${ster}${sr}</${labelTag}>
       ${cfg.picto === 'hulp' ? pictoHtml(it.picto, cfg) : ''}
       ${cfg.spreek ? spreekKnop(it.label) : ''}
@@ -881,7 +675,6 @@ function verstuur() {
   state.uitslag = uitslag;
   const goed = Object.values(uitslag).every(r => r.st === 'ok');
   if (goed) zetKlaar(state.n);
-  meldVooruitgang(state.n, goed ? 'klaar' : 'fout');
   toonFeedback(goed);
 }
 
@@ -911,8 +704,7 @@ function toonFeedback(goed) {
         ${goed
           ? `${n < 8 ? `<button type="button" class="knop" data-actie="volgende">Oefening ${n + 1} ${IC.rechts}</button>` : ''}
              <button type="button" class="knop wit" data-actie="opnieuw">${IC.opnieuw} Nog eens</button>`
-          : `<button type="button" class="knop" data-actie="verbeter">${IC.potlood} Verbeteren</button>
-             <button type="button" class="knop wit" data-actie="opnieuw">${IC.opnieuw} Opnieuw</button>`}
+          : `<button type="button" class="knop" data-actie="verbeter">${IC.potlood} Verbeteren</button>`}
       </div>
     </div>`;
   window.scrollTo(0, 0);
@@ -934,11 +726,9 @@ main.addEventListener('click', e => {
   if (t.classList.contains('hulpknop')) {
     const h = t.parentElement;
     h.classList.add('toon');
-    clearTimeout(h._t); h._t = setTimeout(() => h.classList.remove('toon'), 3000);
+    clearTimeout(h._t); h._t = setTimeout(() => h.classList.remove('toon'), 1500);
     return;
   }
-  if (t.dataset.dier) { kiesDier(t.dataset.dier); return; }
-  if (t.dataset.actie && ['klas', 'klasweg', 'lesgever', 'nieuweklas', 'andereklas', 'wisklas'].includes(t.dataset.actie)) { klasActie(t.dataset.actie, t); return; }
   if (t.dataset.oef) { startOefening(+t.dataset.oef); window.scrollTo(0, 0); return; }
   switch (t.dataset.actie) {
     case 'start': toonStart(); window.scrollTo(0, 0); break;
@@ -950,9 +740,6 @@ main.addEventListener('click', e => {
 });
 main.addEventListener('submit', e => {
   e.preventDefault();
-  if (e.target.id === 'codeform') { controleerCode(document.getElementById('klascode').value); return; }
-  if (e.target.id === 'lesgeverform') { const c = document.getElementById('lgcode').value.toUpperCase().trim(); lesgeverCode = c; zetSS(LK, c); toonLesgever(); return; }
-  if (!state) return;
   if (state.blad < state.cfg.bladen.length - 1) { state.blad++; toonBlad(); window.scrollTo(0, 0); }
   else verstuur();
 });
@@ -966,11 +753,36 @@ function bewaarInGeheugen(e) {
   if (state.uitslag) delete state.uitslag[key.replace(/_[dmj]$/, '')];
 }
 main.addEventListener('input', bewaarInGeheugen);
+// Een aangeduid rondje (bv. geslacht) nog eens aantikken = weer leeg
+main.addEventListener('pointerdown', e => {
+  const lab = e.target.closest('.keuzes label');
+  const r = e.target.matches && e.target.matches('input[type=radio]') ? e.target : lab && lab.querySelector('input[type=radio]');
+  if (r) r.dataset.was = r.checked ? '1' : '0';
+});
+main.addEventListener('click', e => {
+  const r = e.target;
+  if (!(r.matches && r.matches('input[type=radio]'))) return;
+  if (r.dataset.was === '1') {
+    r.checked = false;
+    if (state) state.waarden[r.dataset.key] = '';
+    const v = r.closest('.veld'); if (v) v.classList.remove('fout', 'teveel');
+    if (state && state.uitslag) delete state.uitslag[r.dataset.key];
+  }
+  r.dataset.was = '';
+});
+// Hulppictogram: met de muis zolang je erboven blijft, met de vinger even kort
+main.addEventListener('pointerover', e => {
+  if (e.pointerType !== 'mouse') return;
+  const h = e.target.closest('.hulp'); if (h) { clearTimeout(h._t); h.classList.add('toon'); }
+});
+main.addEventListener('pointerout', e => {
+  if (e.pointerType !== 'mouse') return;
+  const h = e.target.closest('.hulp'); if (h && !h.contains(e.relatedTarget)) h.classList.remove('toon');
+});
 main.addEventListener('change', bewaarInGeheugen);
 
 if ('speechSynthesis' in window) speechSynthesis.getVoices();
-window.addEventListener('hashchange', () => { if (location.hash === '#lesgever') toonLesgever(); });
-if (location.hash === '#lesgever') toonLesgever(); else toonStart();
+toonStart();
 </script>
 </body>
 </html>
